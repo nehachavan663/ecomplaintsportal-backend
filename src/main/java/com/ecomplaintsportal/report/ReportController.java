@@ -19,6 +19,7 @@ public class ReportController {
     public List<ReportDTO> getReports(
             @RequestParam(required = false) String type) {
 
+    	
         return reportService.generateReports(type);
     }
 
