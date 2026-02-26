@@ -31,5 +31,3 @@ public class ReportController {
         return reportService.getDepartmentTotals(type);
     }
 }
-
-

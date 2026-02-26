@@ -1,4 +1,3 @@
-
 package com.ecomplaintsportal.report;
 
 public class ReportDTO {
@@ -32,5 +31,3 @@ public class ReportDTO {
     public String getCompletedDate() { return completedDate; }
     public long getComplaints() { return complaints; }
 }
-
-
