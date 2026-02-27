@@ -28,9 +28,19 @@ public class AdminController {
         long inProgress = complaintRepository.countByStatus("In Progress");
         long resolved = complaintRepository.countByStatus("Resolved");
 
-        List<Complaint> recentComplaints =
+        List<Complaint> complaints =
                 complaintRepository.findTop5ByOrderByIdDesc();
 
+        List<DashboardComplaintDTO> recentComplaints =
+                complaints.stream()
+                        .map(c -> new DashboardComplaintDTO(
+                                c.getId(),
+                                c.getUserName(),
+                                c.getTitle(),
+                                c.getCategory(),
+                                c.getStatus()
+                        ))
+                        .toList();
         response.put("total", total);
         response.put("pending", pending);
         response.put("inProgress", inProgress);
