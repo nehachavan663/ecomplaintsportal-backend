@@ -2,11 +2,10 @@ package com.ecomplaintsportal.LRE;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import com.ecomplaintsportal.LRE.*;
 
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "*")
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/lre")   // ✅ FIXED
 public class UserController {
 
     @Autowired
@@ -19,11 +18,17 @@ public class UserController {
 
     @PostMapping("/login")
     public String login(@RequestBody User user) {
-        return userService.loginUser(user.getEmail(), user.getPassword());
+        return userService.loginUser(
+                user.getEmail(),
+                user.getPassword()
+        );
     }
 
     @PutMapping("/forgot-password")
     public String forgotPassword(@RequestBody User user) {
-        return userService.updatePassword(user.getEmail(), user.getPassword());
+        return userService.updatePassword(
+                user.getEmail(),
+                user.getPassword()
+        );
     }
 }
