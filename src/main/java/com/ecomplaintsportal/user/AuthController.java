@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     @Autowired
-    private UserRepository userRepository;
+    private AdminUserRepository userRepository;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody User loginRequest) {
