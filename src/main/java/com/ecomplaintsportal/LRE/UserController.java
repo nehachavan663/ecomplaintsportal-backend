@@ -29,9 +29,10 @@ public class UserController {
     public String forgotPassword(@RequestBody Map<String, String> data) {
 
         String email = data.get("email");
+        String question = data.get("question");   // ✅ ADD THIS
         String answer = data.get("answer");
         String newPassword = data.get("newPassword");
 
-        return userService.verifyAndUpdate(email, answer, newPassword);
+        return userService.verifyAndUpdate(email, question, answer, newPassword);
     }
 }

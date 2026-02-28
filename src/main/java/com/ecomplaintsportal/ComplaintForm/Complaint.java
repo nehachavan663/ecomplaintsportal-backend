@@ -11,6 +11,8 @@ public class Complaint {
     @Id
     private String id;
 
+
+    private String studentId;
     private String userName;
     private String title;
     private String area;
@@ -76,4 +78,12 @@ public class Complaint {
 
     public LocalDateTime getResolvedAt() { return resolvedAt; }
     public void setResolvedAt(LocalDateTime resolvedAt) { this.resolvedAt = resolvedAt; }
+
+	public String getStudentId() {
+		return studentId;
+	}
+
+	public void setStudentId(String studentId) {
+		this.studentId = studentId;
+	}
 }

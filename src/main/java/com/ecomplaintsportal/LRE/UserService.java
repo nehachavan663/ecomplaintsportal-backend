@@ -29,22 +29,28 @@ public class UserService {
         }
     }
 
-    // Forgot Password
-    public String verifyAndUpdate(String email, String answer, String newPassword) {
+ // Forgot Password
+    public String verifyAndUpdate(String email, String question, String answer, String newPassword) {
 
         User user = userRepository.findByEmail(email);
 
         if (user == null) {
-            return "User not found";
+            return "User Not Found";
         }
 
-        if (!user.getSecurityAnswer().equalsIgnoreCase(answer)) {
-            return "Incorrect security answer";
+        if (user.getSecurityQuestion() == null || 
+            !user.getSecurityQuestion().equals(question)) {
+            return "Security Question Incorrect";
+        }
+
+        if (user.getSecurityAnswer() == null || 
+            !user.getSecurityAnswer().equalsIgnoreCase(answer)) {
+            return "Security Answer Incorrect";
         }
 
         user.setPassword(newPassword);
         userRepository.save(user);
 
-        return "Password updated successfully";
+        return "Password Updated Successfully";
     }
-    }
+}
