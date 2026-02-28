@@ -65,4 +65,29 @@ public Complaint saveComplaint(Complaint complaint) {
     public void deleteComplaint(String id) {
         repository.deleteById(id);
     }
+    
+ // ===============================
+    // NEW METHODS FOR STUDENT PROFILE
+    // ===============================
+
+    // Get all complaints of a specific student
+    public List<Complaint> getComplaintsByStudentId(String studentId) {
+        return repository.findByStudentId(studentId);
+    }
+
+    // Count Pending complaints
+    public long countPendingByStudent(String studentId) {
+        return repository.countByStudentIdAndStatus(studentId, "Pending");
+    }
+
+    // Count In Progress complaints
+    public long countInProgressByStudent(String studentId) {
+        return repository.countByStudentIdAndStatus(studentId, "In Progress");
+    }
+
+    // Count Resolved complaints
+    public long countResolvedByStudent(String studentId) {
+        return repository.countByStudentIdAndStatus(studentId, "Resolved");
+    }
+
 }
