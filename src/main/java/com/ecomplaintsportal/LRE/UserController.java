@@ -1,6 +1,7 @@
 package com.ecomplaintsportal.LRE;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import java.util.Map;
 import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin(origins = "*")
@@ -25,10 +26,12 @@ public class UserController {
     }
 
     @PutMapping("/forgot-password")
-    public String forgotPassword(@RequestBody User user) {
-        return userService.updatePassword(
-                user.getEmail(),
-                user.getPassword()
-        );
+    public String forgotPassword(@RequestBody Map<String, String> data) {
+
+        String email = data.get("email");
+        String answer = data.get("answer");
+        String newPassword = data.get("newPassword");
+
+        return userService.verifyAndUpdate(email, answer, newPassword);
     }
 }

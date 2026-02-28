@@ -30,16 +30,21 @@ public class UserService {
     }
 
     // Forgot Password
-    public String updatePassword(String email, String newPassword) {
+    public String verifyAndUpdate(String email, String answer, String newPassword) {
 
         User user = userRepository.findByEmail(email);
 
-        if (user != null) {
-            user.setPassword(newPassword);
-            userRepository.save(user);
-            return "Password Updated Successfully";
-        } else {
-            return "User Not Found";
+        if (user == null) {
+            return "User not found";
         }
+
+        if (!user.getSecurityAnswer().equalsIgnoreCase(answer)) {
+            return "Incorrect security answer";
+        }
+
+        user.setPassword(newPassword);
+        userRepository.save(user);
+
+        return "Password updated successfully";
     }
-}
+    }
