@@ -3,9 +3,11 @@ package com.ecomplaintsportal.LRE;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @CrossOrigin(origins = "*")
 @RestController
-@RequestMapping("/api/lre")   // ✅ FIXED
+@RequestMapping("/api/lre")
 public class UserController {
 
     @Autowired
@@ -25,10 +27,13 @@ public class UserController {
     }
 
     @PutMapping("/forgot-password")
-    public String forgotPassword(@RequestBody User user) {
-        return userService.updatePassword(
-                user.getEmail(),
-                user.getPassword()
-        );
+    public String forgotPassword(@RequestBody Map<String, String> data) {
+
+        String email = data.get("email");
+        String question = data.get("question");
+        String answer = data.get("answer");
+        String newPassword = data.get("newPassword");
+
+        return userService.verifyAndUpdate(email, question, answer, newPassword);
     }
 }
