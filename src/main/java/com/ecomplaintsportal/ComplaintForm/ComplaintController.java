@@ -14,19 +14,21 @@ public class ComplaintController {
         this.service = service;
     }
 
-    // CREATE
     @PostMapping
     public Complaint createComplaint(@RequestBody Complaint complaint) {
         return service.saveComplaint(complaint);
     }
 
-    // GET ALL
     @GetMapping
     public List<Complaint> getAllComplaints() {
         return service.getAllComplaints();
     }
 
-    // UPDATE (Admin Update)
+    @GetMapping("/department/{department}")
+    public List<Complaint> getByDepartment(@PathVariable String department) {
+        return service.getComplaintsByDepartment(department);
+    }
+
     @PutMapping("/{id}")
     public Complaint updateComplaint(
             @PathVariable String id,
@@ -35,7 +37,6 @@ public class ComplaintController {
         return service.updateComplaint(id, updatedComplaint);
     }
 
-    // DELETE
     @DeleteMapping("/{id}")
     public void deleteComplaint(@PathVariable String id) {
         service.deleteComplaint(id);

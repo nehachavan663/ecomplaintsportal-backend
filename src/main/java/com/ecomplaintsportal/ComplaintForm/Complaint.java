@@ -2,7 +2,6 @@ package com.ecomplaintsportal.ComplaintForm;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-
 import java.time.LocalDateTime;
 
 @Document(collection = "complaints")
@@ -16,24 +15,25 @@ public class Complaint {
     private String area;
     private String category;
     private String description;
-    private String date;   // form date (optional)
+    private String date;
+
     private String image;
+    private String resolvedImage;
+
     private String status;
     private String department;
     private String response;
 
-    // 🔥 NEW FIELDS (Lifecycle)
     private LocalDateTime createdAt;
     private LocalDateTime startedAt;
     private LocalDateTime resolvedAt;
 
-    // Default constructor
     public Complaint() {
         this.status = "Pending";
-        this.createdAt = LocalDateTime.now(); // auto set
+        this.createdAt = LocalDateTime.now();
     }
 
-    // ================= GETTERS & SETTERS =================
+    /* getters and setters */
 
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
@@ -58,6 +58,9 @@ public class Complaint {
 
     public String getImage() { return image; }
     public void setImage(String image) { this.image = image; }
+
+    public String getResolvedImage() { return resolvedImage; }
+    public void setResolvedImage(String resolvedImage) { this.resolvedImage = resolvedImage; }
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }

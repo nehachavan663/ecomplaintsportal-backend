@@ -1,68 +1,101 @@
 package com.ecomplaintsportal.ComplaintForm;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.util.List;
+
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
 @Service
 public class ComplaintService {
 
-    private final ComplaintRepository repository;
+    @Autowired
+    private ComplaintRepository repository;
 
-    public ComplaintService(ComplaintRepository repository) {
-        this.repository = repository;
+    /* ================= CREATE COMPLAINT ================= */
+
+    public Complaint saveComplaint(Complaint complaint) {
+
+        if (complaint.getStatus() == null || complaint.getStatus().isBlank()) {
+            complaint.setStatus("Pending");
+        }
+
+        complaint.setCreatedAt(LocalDateTime.now());
+
+        return repository.save(complaint);
     }
 
+    /* ================= GET ALL COMPLAINTS ================= */
 
-public Complaint saveComplaint(Complaint complaint) {
-
-    complaint.setStatus("Pending");
-    complaint.setCreatedAt(LocalDateTime.now());
-
-    return repository.save(complaint);
-}
     public List<Complaint> getAllComplaints() {
         return repository.findAll();
     }
 
-    
+    /* ================= UPDATE COMPLAINT ================= */
 
-    public Complaint updateComplaint(String id, Complaint updated) {
+    public Complaint updateComplaint(String id, Complaint updatedComplaint) {
 
-        Complaint existing = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Complaint not found"));
+        Optional<Complaint> optionalComplaint = repository.findById(id);
 
-        // 🔁 STATUS CHANGE LOGIC
-        if (updated.getStatus() != null) {
-
-            String oldStatus = existing.getStatus();
-            String newStatus = updated.getStatus();
-
-            if (!oldStatus.equals(newStatus)) {
-
-                // When work starts
-                if (newStatus.equals("In Progress") && existing.getStartedAt() == null) {
-                    existing.setStartedAt(LocalDateTime.now());
-                }
-
-                // When work completes
-                if (newStatus.equals("Resolved") && existing.getResolvedAt() == null) {
-                    existing.setResolvedAt(LocalDateTime.now());
-                }
-            }
-
-            existing.setStatus(newStatus);
+        if (optionalComplaint.isEmpty()) {
+            return null;
         }
 
-        if (updated.getDepartment() != null)
-            existing.setDepartment(updated.getDepartment());
+        Complaint existing = optionalComplaint.get();
 
-        if (updated.getResponse() != null)
-            existing.setResponse(updated.getResponse());
+        /* ---------- STATUS UPDATE ---------- */
+
+        if (updatedComplaint.getStatus() != null) {
+
+            existing.setStatus(updatedComplaint.getStatus().trim());
+
+            if ("In Progress".equalsIgnoreCase(updatedComplaint.getStatus())) {
+                existing.setStartedAt(LocalDateTime.now());
+            }
+
+            if ("Resolved".equalsIgnoreCase(updatedComplaint.getStatus())) {
+                existing.setResolvedAt(LocalDateTime.now());
+            }
+        }
+
+        /* ---------- RESPONSE UPDATE ---------- */
+
+        if (updatedComplaint.getResponse() != null) {
+            existing.setResponse(updatedComplaint.getResponse());
+        }
+
+        /* ---------- RESOLVED IMAGE ---------- */
+
+        if (updatedComplaint.getResolvedImage() != null) {
+            existing.setResolvedImage(updatedComplaint.getResolvedImage());
+        }
+
+        /* ---------- DEPARTMENT ASSIGN ---------- */
+
+        if (updatedComplaint.getDepartment() != null &&
+            !updatedComplaint.getDepartment().isBlank()) {
+
+            existing.setDepartment(updatedComplaint.getDepartment().trim());
+        }
 
         return repository.save(existing);
     }
 
+    /* ================= DELETE COMPLAINT ================= */
+
     public void deleteComplaint(String id) {
         repository.deleteById(id);
+    }
+
+    /* ================= GET BY DEPARTMENT ================= */
+
+    public List<Complaint> getComplaintsByDepartment(String department) {
+
+        if (department == null || department.isBlank()) {
+            return List.of();
+        }
+
+        return repository.findByDepartmentIgnoreCase(department.trim());
     }
 }
