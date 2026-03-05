@@ -1,65 +1,60 @@
 package com.ecomplaintsportal.studentProfile;
 
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
+
+import com.ecomplaintsportal.ComplaintForm.ComplaintRepository;
+import com.ecomplaintsportal.LRE.User;
+import com.ecomplaintsportal.LRE.UserRepository;
 
 @Service
 public class StudentProfileService {
 
     @Autowired
-    private StudentProfileRepository studentRepository;
+    private UserRepository userRepository;
 
-    private final String uploadDir = "uploads/";
+    @Autowired
+    private ComplaintRepository complaintRepository;
 
-    // =========================
-    // GET STUDENT BY ID
-    // =========================
-    public StudentProfile getStudentById(String id) {
-        return studentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Student not found"));
+    public User getStudentProfile(String id){
+        return userRepository.findById(id).orElse(null);
     }
 
-    // =========================
-    // UPDATE STUDENT PROFILE
-    // =========================
-    public StudentProfile updateStudentProfile(String id,
-                                               StudentProfile updatedStudent,
-                                               MultipartFile image) {
+    public User updateStudentProfile(String id, User updatedUser){
 
-        StudentProfile existing = studentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Student not found"));
+        User user = userRepository.findById(id).orElse(null);
 
-        existing.setName(updatedStudent.getName());
-        existing.setRollNo(updatedStudent.getRollNo());
-        existing.setDepartment(updatedStudent.getDepartment());
-        existing.setClassName(updatedStudent.getClassName());
-        existing.setEmail(updatedStudent.getEmail());
-        existing.setPhone(updatedStudent.getPhone());
-        existing.setAddress(updatedStudent.getAddress());
-
-        if (image != null && !image.isEmpty()) {
-            try {
-                String fileName = image.getOriginalFilename();
-                java.nio.file.Path uploadPath = Paths.get(uploadDir);
-
-                Files.createDirectories(uploadPath);
-
-                Files.copy(image.getInputStream(),
-                        uploadPath.resolve(fileName),
-                        StandardCopyOption.REPLACE_EXISTING);
-
-                existing.setProfileImage(fileName);
-
-            } catch (Exception e) {
-                throw new RuntimeException("Image upload failed");
-            }
+        if(user == null){
+            return null;
         }
 
-        return studentRepository.save(existing);
+        user.setFullName(updatedUser.getFullName());
+        user.setFatherName(updatedUser.getFatherName());
+        user.setRollNumber(updatedUser.getRollNumber());
+        user.setDepartment(updatedUser.getDepartment());
+        user.setClassName(updatedUser.getClassName());
+        user.setEmail(updatedUser.getEmail());
+        user.setPhone(updatedUser.getPhone());
+
+        return userRepository.save(user);
+    }
+
+    public void saveImage(String id, String imageId){
+
+        User user = userRepository.findById(id).orElse(null);
+
+        if(user != null){
+            user.setProfileImage(imageId);
+            userRepository.save(user);
+        }
+    }
+
+    public ComplaintSummaryDTO getComplaintSummary(String studentId){
+
+        long pending = complaintRepository.countByStudentIdAndStatus(studentId,"Pending");
+        long progress = complaintRepository.countByStudentIdAndStatus(studentId,"In Progress");
+        long resolved = complaintRepository.countByStudentIdAndStatus(studentId,"Resolved");
+
+        return new ComplaintSummaryDTO(pending,progress,resolved);
     }
 }

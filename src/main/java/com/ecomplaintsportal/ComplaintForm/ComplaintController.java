@@ -26,6 +26,14 @@ public class ComplaintController {
     public List<Complaint> getAllComplaints() {
         return service.getAllComplaints();
     }
+    
+
+    // NEW ENDPOINT: Student Profile Summary
+    @GetMapping("/student/{studentId}")
+    public Map<String, Long> getSummary(@PathVariable String studentId) {
+        return service.getSummary(studentId);
+    }
+
 
     // UPDATE (Admin Update)
     @PutMapping("/{id}")
@@ -55,15 +63,4 @@ public class ComplaintController {
         return service.updateComplaint(id, updated);
     }
 
-    // ==================================================
-    // NEW ENDPOINT: Student Profile Summary
-    // ==================================================
-    @GetMapping("/summary/{studentId}")
-    public Map<String, Object> getSummary(@PathVariable String studentId) {
-        return Map.of(
-                "pending", service.countPendingByStudent(studentId),
-                "inProgress", service.countInProgressByStudent(studentId),
-                "resolved", service.countResolvedByStudent(studentId)
-        );
-    }
 }

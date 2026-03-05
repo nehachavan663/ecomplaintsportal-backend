@@ -13,19 +13,29 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    // Register
     @PostMapping("/register")
     public User register(@RequestBody User user) {
         return userService.registerUser(user);
     }
 
+    // Login
     @PostMapping("/login")
-    public String login(@RequestBody User user) {
-        return userService.loginUser(
-                user.getEmail(),
-                user.getPassword()
-        );
+    public User login(@RequestBody Map<String, String> data) {
+
+        String email = data.get("email");
+        String password = data.get("password");
+
+        User user = userService.loginUser(email, password);
+
+        if (user == null) {
+            throw new RuntimeException("Invalid Email or Password");
+        }
+
+        return user;
     }
 
+    // Forgot Password
     @PutMapping("/forgot-password")
     public String forgotPassword(@RequestBody Map<String, String> data) {
 
