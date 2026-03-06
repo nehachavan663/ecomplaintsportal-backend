@@ -1,17 +1,22 @@
 package com.ecomplaintsportal.ComplaintForm;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class ComplaintService {
 
-    @Autowired
-    private ComplaintRepository repository;
+    private final ComplaintRepository repository;
+    private final SimpMessagingTemplate messagingTemplate;
+
+    public ComplaintService(ComplaintRepository repository,
+                            SimpMessagingTemplate messagingTemplate) {
+        this.repository = repository;
+        this.messagingTemplate = messagingTemplate;
+    }
 
     /* ================= CREATE COMPLAINT ================= */
 
@@ -36,27 +41,28 @@ public class ComplaintService {
 
     public Complaint updateComplaint(String id, Complaint updatedComplaint) {
 
-        Optional<Complaint> optionalComplaint = repository.findById(id);
-
-        if (optionalComplaint.isEmpty()) {
-            return null;
-        }
-
-        Complaint existing = optionalComplaint.get();
+        Complaint existing = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Complaint not found"));
 
         /* ---------- STATUS UPDATE ---------- */
 
         if (updatedComplaint.getStatus() != null) {
 
-            existing.setStatus(updatedComplaint.getStatus().trim());
+            String newStatus = updatedComplaint.getStatus().trim();
+            String oldStatus = existing.getStatus();
 
-            if ("In Progress".equalsIgnoreCase(updatedComplaint.getStatus())) {
-                existing.setStartedAt(LocalDateTime.now());
+            if (!newStatus.equals(oldStatus)) {
+
+                if ("In Progress".equalsIgnoreCase(newStatus) && existing.getStartedAt() == null) {
+                    existing.setStartedAt(LocalDateTime.now());
+                }
+
+                if ("Resolved".equalsIgnoreCase(newStatus) && existing.getResolvedAt() == null) {
+                    existing.setResolvedAt(LocalDateTime.now());
+                }
             }
 
-            if ("Resolved".equalsIgnoreCase(updatedComplaint.getStatus())) {
-                existing.setResolvedAt(LocalDateTime.now());
-            }
+            existing.setStatus(newStatus);
         }
 
         /* ---------- RESPONSE UPDATE ---------- */
@@ -74,12 +80,23 @@ public class ComplaintService {
         /* ---------- DEPARTMENT ASSIGN ---------- */
 
         if (updatedComplaint.getDepartment() != null &&
-            !updatedComplaint.getDepartment().isBlank()) {
+                !updatedComplaint.getDepartment().isBlank()) {
 
             existing.setDepartment(updatedComplaint.getDepartment().trim());
         }
 
-        return repository.save(existing);
+        Complaint saved = repository.save(existing);
+
+        /* ---------- WEBSOCKET UPDATE ---------- */
+
+        if (existing.getStudentId() != null) {
+            messagingTemplate.convertAndSend(
+                    "/topic/complaints/" + existing.getStudentId(),
+                    "updated"
+            );
+        }
+
+        return saved;
     }
 
     /* ================= DELETE COMPLAINT ================= */
@@ -97,5 +114,30 @@ public class ComplaintService {
         }
 
         return repository.findByDepartmentIgnoreCase(department.trim());
+    }
+
+    /* ================= GET BY STUDENT ================= */
+
+    public List<Complaint> getByStudent(String studentId) {
+        return repository.findByStudentId(studentId);
+    }
+
+    /* ================= STUDENT SUMMARY ================= */
+
+    public Map<String, Long> getSummary(String studentId) {
+
+        long pending = repository.countByStudentIdAndStatus(studentId, "Pending");
+        long progress = repository.countByStudentIdAndStatus(studentId, "In Progress");
+        long resolved = repository.countByStudentIdAndStatus(studentId, "Resolved");
+
+        long total = pending + progress + resolved;
+
+        Map<String, Long> summary = new HashMap<>();
+        summary.put("total", total);
+        summary.put("pending", pending);
+        summary.put("progress", progress);
+        summary.put("resolved", resolved);
+
+        return summary;
     }
 }

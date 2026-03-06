@@ -11,28 +11,32 @@ public class UserService {
     private UserRepository userRepository;
 
     @Autowired
-    private PasswordEncoder passwordEncoder;   // ✅ ADD THIS
+    private PasswordEncoder passwordEncoder;
 
     // Register
     public User registerUser(User user) {
 
-        // ✅ Encrypt password before saving
+        User existingUser = userRepository.findByEmail(user.getEmail());
+
+        if (existingUser != null) {
+            throw new RuntimeException("Email already registered");
+        }
+
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         return userRepository.save(user);
     }
 
     // Login
-    public String loginUser(String email, String password) {
+    public User loginUser(String email, String password) {
 
         User user = userRepository.findByEmail(email);
 
-        if (user != null && 
-            passwordEncoder.matches(password, user.getPassword())) {   // ✅ FIXED
-            return "Login Successful";
-        } else {
-            return "Invalid Email or Password";
+        if (user != null && passwordEncoder.matches(password, user.getPassword())) {
+            return user;
         }
+
+        return null;
     }
 
     // Forgot Password
@@ -44,19 +48,15 @@ public class UserService {
             return "User Not Found";
         }
 
-        if (user.getSecurityQuestion() == null ||
-                !user.getSecurityQuestion().equals(question)) {
+        if (!user.getSecurityQuestion().equals(question)) {
             return "Security Question Incorrect";
         }
 
-        if (user.getSecurityAnswer() == null ||
-                !user.getSecurityAnswer().equalsIgnoreCase(answer)) {
+        if (!user.getSecurityAnswer().equalsIgnoreCase(answer)) {
             return "Security Answer Incorrect";
         }
 
-        // ✅ Encrypt new password before saving
         user.setPassword(passwordEncoder.encode(newPassword));
-
         userRepository.save(user);
 
         return "Password Updated Successfully";

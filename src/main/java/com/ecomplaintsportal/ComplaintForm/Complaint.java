@@ -10,7 +10,9 @@ public class Complaint {
     @Id
     private String id;
 
+    private String studentId;
     private String userName;
+
     private String title;
     private String area;
     private String category;
@@ -33,10 +35,13 @@ public class Complaint {
         this.createdAt = LocalDateTime.now();
     }
 
-    /* getters and setters */
+    // getters and setters
 
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
+
+    public String getStudentId() { return studentId; }
+    public void setStudentId(String studentId) { this.studentId = studentId; }
 
     public String getUserName() { return userName; }
     public void setUserName(String userName) { this.userName = userName; }

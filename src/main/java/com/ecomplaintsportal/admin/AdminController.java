@@ -35,7 +35,7 @@ public class AdminController {
                 complaints.stream()
                         .map(c -> new DashboardComplaintDTO(
                                 c.getId(),
-                                c.getUserName(),
+                                c.getStudentId(),
                                 c.getTitle(),
                                 c.getCategory(),
                                 c.getStatus()
