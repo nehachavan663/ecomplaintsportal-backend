@@ -26,16 +26,20 @@ public class ComplaintController {
     public List<Complaint> getAllComplaints() {
         return service.getAllComplaints();
     }
-    
 
-    // NEW ENDPOINT: Student Profile Summary
+    // GET BY DEPARTMENT
+    @GetMapping("/department/{department}")
+    public List<Complaint> getByDepartment(@PathVariable String department) {
+        return service.getComplaintsByDepartment(department);
+    }
+
+    // STUDENT PROFILE SUMMARY
     @GetMapping("/student/{studentId}")
     public Map<String, Long> getSummary(@PathVariable String studentId) {
         return service.getSummary(studentId);
     }
 
-
-    // UPDATE (Admin Update)
+    // UPDATE FULL COMPLAINT
     @PutMapping("/{id}")
     public Complaint updateComplaint(
             @PathVariable String id,
@@ -44,15 +48,7 @@ public class ComplaintController {
         return service.updateComplaint(id, updatedComplaint);
     }
 
-    // DELETE
-    @DeleteMapping("/{id}")
-    public void deleteComplaint(@PathVariable String id) {
-        service.deleteComplaint(id);
-    }
-    
- // ==================================================
-    // NEW ENDPOINT: Update Only Status (Admin Quick Update)
-    // ==================================================
+    // QUICK STATUS UPDATE
     @PutMapping("/{id}/status")
     public Complaint updateStatus(@PathVariable String id,
                                   @RequestParam String status) {
@@ -63,4 +59,9 @@ public class ComplaintController {
         return service.updateComplaint(id, updated);
     }
 
+    // DELETE
+    @DeleteMapping("/{id}")
+    public void deleteComplaint(@PathVariable String id) {
+        service.deleteComplaint(id);
+    }
 }

@@ -3,10 +3,8 @@ package com.ecomplaintsportal.ComplaintForm;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.time.LocalDateTime;
+import java.util.*;
 
 @Service
 public class ComplaintService {
@@ -20,35 +18,46 @@ public class ComplaintService {
         this.messagingTemplate = messagingTemplate;
     }
 
+    /* ================= CREATE COMPLAINT ================= */
+
     public Complaint saveComplaint(Complaint complaint) {
 
-        complaint.setStatus("Pending");
+        if (complaint.getStatus() == null || complaint.getStatus().isBlank()) {
+            complaint.setStatus("Pending");
+        }
+
         complaint.setCreatedAt(LocalDateTime.now());
 
         return repository.save(complaint);
     }
 
+    /* ================= GET ALL COMPLAINTS ================= */
+
     public List<Complaint> getAllComplaints() {
         return repository.findAll();
     }
 
-    public Complaint updateComplaint(String id, Complaint updated) {
+    /* ================= UPDATE COMPLAINT ================= */
+
+    public Complaint updateComplaint(String id, Complaint updatedComplaint) {
 
         Complaint existing = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Complaint not found"));
 
-        if (updated.getStatus() != null) {
+        /* ---------- STATUS UPDATE ---------- */
 
+        if (updatedComplaint.getStatus() != null) {
+
+            String newStatus = updatedComplaint.getStatus().trim();
             String oldStatus = existing.getStatus();
-            String newStatus = updated.getStatus();
 
-            if (!oldStatus.equals(newStatus)) {
+            if (!newStatus.equals(oldStatus)) {
 
-                if (newStatus.equals("In Progress") && existing.getStartedAt() == null) {
+                if ("In Progress".equalsIgnoreCase(newStatus) && existing.getStartedAt() == null) {
                     existing.setStartedAt(LocalDateTime.now());
                 }
 
-                if (newStatus.equals("Resolved") && existing.getResolvedAt() == null) {
+                if ("Resolved".equalsIgnoreCase(newStatus) && existing.getResolvedAt() == null) {
                     existing.setResolvedAt(LocalDateTime.now());
                 }
             }
@@ -56,34 +65,64 @@ public class ComplaintService {
             existing.setStatus(newStatus);
         }
 
-        if (updated.getDepartment() != null)
-            existing.setDepartment(updated.getDepartment());
+        /* ---------- RESPONSE UPDATE ---------- */
 
-        if (updated.getResponse() != null)
-            existing.setResponse(updated.getResponse());
+        if (updatedComplaint.getResponse() != null) {
+            existing.setResponse(updatedComplaint.getResponse());
+        }
+
+        /* ---------- RESOLVED IMAGE ---------- */
+
+        if (updatedComplaint.getResolvedImage() != null) {
+            existing.setResolvedImage(updatedComplaint.getResolvedImage());
+        }
+
+        /* ---------- DEPARTMENT ASSIGN ---------- */
+
+        if (updatedComplaint.getDepartment() != null &&
+                !updatedComplaint.getDepartment().isBlank()) {
+
+            existing.setDepartment(updatedComplaint.getDepartment().trim());
+        }
 
         Complaint saved = repository.save(existing);
 
-        // Send real-time update to student profile
-        messagingTemplate.convertAndSend(
-                "/topic/complaints/" + existing.getStudentId(),
-                "updated"
-        );
+        /* ---------- WEBSOCKET UPDATE ---------- */
+
+        if (existing.getStudentId() != null) {
+            messagingTemplate.convertAndSend(
+                    "/topic/complaints/" + existing.getStudentId(),
+                    "updated"
+            );
+        }
 
         return saved;
     }
+
+    /* ================= DELETE COMPLAINT ================= */
 
     public void deleteComplaint(String id) {
         repository.deleteById(id);
     }
 
-    // ===============================
-    // STUDENT PROFILE METHODS
-    // ===============================
+    /* ================= GET BY DEPARTMENT ================= */
+
+    public List<Complaint> getComplaintsByDepartment(String department) {
+
+        if (department == null || department.isBlank()) {
+            return List.of();
+        }
+
+        return repository.findByDepartmentIgnoreCase(department.trim());
+    }
+
+    /* ================= GET BY STUDENT ================= */
 
     public List<Complaint> getByStudent(String studentId) {
         return repository.findByStudentId(studentId);
     }
+
+    /* ================= STUDENT SUMMARY ================= */
 
     public Map<String, Long> getSummary(String studentId) {
 
