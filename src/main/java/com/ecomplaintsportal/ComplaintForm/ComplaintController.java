@@ -26,6 +26,10 @@ public class ComplaintController {
     public List<Complaint> getAllComplaints() {
         return service.getAllComplaints();
     }
+    @GetMapping("/student/{studentId}/complaints")
+    public List<Complaint> getComplaintsByStudent(@PathVariable String studentId) {
+        return service.getByStudent(studentId);
+    }
 
     // GET BY DEPARTMENT
     @GetMapping("/department/{department}")

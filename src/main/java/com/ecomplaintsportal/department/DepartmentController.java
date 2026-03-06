@@ -48,6 +48,9 @@ public class DepartmentController {
             return ResponseEntity.status(401).body("Invalid Login");
         }
 
+        // Remove password before sending response
+        staff.setPassword(null);
+
         return ResponseEntity.ok(staff);
     }
 
