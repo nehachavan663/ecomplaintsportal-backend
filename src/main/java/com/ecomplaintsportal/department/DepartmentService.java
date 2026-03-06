@@ -1,6 +1,7 @@
 package com.ecomplaintsportal.department;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -10,6 +11,8 @@ public class DepartmentService {
 
     @Autowired
     private DepartmentRepository repository;
+
+    private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     /* ================= GET ALL ================= */
 
@@ -24,6 +27,11 @@ public class DepartmentService {
         if (department.getDepartment() != null) {
             department.setDepartment(department.getDepartment().trim());
         }
+
+        // Encrypt password
+        department.setPassword(
+                encoder.encode(department.getPassword())
+        );
 
         return repository.save(department);
     }
@@ -51,14 +59,16 @@ public class DepartmentService {
 
     public Department login(String email, String password) {
 
-        if (email == null || password == null) {
+        Department staff = repository.findByEmail(email.trim());
+
+        if (staff == null || !staff.getStatus().equals("Active")) {
             return null;
         }
 
-        return repository.findByEmailAndPasswordAndStatus(
-                email.trim(),
-                password.trim(),
-                "Active"
-        );
+        if (encoder.matches(password, staff.getPassword())) {
+            return staff;
+        }
+
+        return null;
     }
 }
