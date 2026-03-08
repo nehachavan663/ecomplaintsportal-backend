@@ -23,18 +23,18 @@ public class UserController {
     @PostMapping("/login")
     public User login(@RequestBody Map<String, String> data) {
 
-        String email = data.get("email");
-        String password = data.get("password");
+    String login = data.get("login");
+    String password = data.get("password");
 
-        User user = userService.loginUser(email, password);
+    User user = userService.loginUser(login, password);
 
-        if (user == null) {
-            throw new RuntimeException("Invalid Email or Password");
-        }
-
-        return user;
+    if (user == null) {
+        throw new RuntimeException("Invalid Username / Email / Phone or Password");
     }
 
+    return user;
+
+    }
     // Forgot Password
     @PutMapping("/forgot-password")
     public String forgotPassword(@RequestBody Map<String, String> data) {
