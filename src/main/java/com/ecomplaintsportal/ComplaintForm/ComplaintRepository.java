@@ -14,4 +14,6 @@ public interface ComplaintRepository extends MongoRepository<Complaint, String> 
     long countByStudentIdAndStatus(String studentId, String status);
 
     long countByStatus(String status);
+    
+    long countByCategory(String category);
 }
