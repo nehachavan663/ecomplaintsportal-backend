@@ -13,25 +13,29 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    // Register
+    // ================= REGISTER USER =================
     public User registerUser(User user) {
 
+        // Check if email already exists
         User existingUser = userRepository.findByEmail(user.getEmail());
 
         if (existingUser != null) {
             throw new RuntimeException("Email already registered");
         }
 
+        // Encrypt password before saving
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         return userRepository.save(user);
     }
 
-    // Login
-    public User loginUser(String email, String password) {
+    // ================= LOGIN USER =================
+    public User loginUser(String login, String password) {
 
-        User user = userRepository.findByEmail(email);
+        // Login using email OR phone OR full name
+        User user = userRepository.findByEmailOrPhoneOrFullName(login, login, login);
 
+        // Check password using PasswordEncoder
         if (user != null && passwordEncoder.matches(password, user.getPassword())) {
             return user;
         }
@@ -39,7 +43,7 @@ public class UserService {
         return null;
     }
 
-    // Forgot Password
+    // ================= FORGOT PASSWORD =================
     public String verifyAndUpdate(String email, String question, String answer, String newPassword) {
 
         User user = userRepository.findByEmail(email);
@@ -56,6 +60,7 @@ public class UserService {
             return "Security Answer Incorrect";
         }
 
+        // Update password with encryption
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
 
