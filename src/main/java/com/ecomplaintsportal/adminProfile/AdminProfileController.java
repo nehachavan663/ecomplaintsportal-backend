@@ -15,6 +15,7 @@ public class AdminProfileController {
     @Autowired
     private AdminRepository adminRepository;
 
+
     /* ================= GET PROFILE ================= */
 
     @GetMapping("/profile/{email}")
@@ -28,6 +29,7 @@ public class AdminProfileController {
 
         return ResponseEntity.ok(admin);
     }
+
 
     /* ================= UPDATE PROFILE ================= */
 
@@ -44,7 +46,7 @@ public class AdminProfileController {
         admin.setPhone(updatedAdmin.getPhone());
         admin.setDepartment(updatedAdmin.getDepartment());
         admin.setLocation(updatedAdmin.getLocation());
-        admin.setBio(updatedAdmin.getBio());
+        admin.setBio(updatedAdmin.getBio());   // ✅ ADD THIS LINE
 
         adminRepository.save(admin);
 
@@ -62,53 +64,20 @@ public class AdminProfileController {
             return ResponseEntity.badRequest().body("Admin not found");
         }
 
-        if(request.getCurrentPassword() == null || request.getNewPassword() == null){
-            return ResponseEntity.badRequest().body("Password fields required");
-        }
-
         if(!admin.getPassword().equals(request.getCurrentPassword())){
             return ResponseEntity.badRequest().body("Current password incorrect");
         }
 
         admin.setPassword(request.getNewPassword());
+
         adminRepository.save(admin);
 
         return ResponseEntity.ok("Password Updated Successfully");
     }
 
-    /* ================= ENABLE 2FA ================= */
 
-    @PostMapping("/enable-2fa")
-    public ResponseEntity<?> enable2FA(@RequestBody TwoFARequest request){
 
-        Admin admin = adminRepository.findByEmail(request.getEmail());
 
-        if(admin == null){
-            return ResponseEntity.badRequest().body("Admin not found");
-        }
 
-        // STEP 1: Generate OTP if not created yet
-        if(admin.getTwoFactorSecret() == null){
 
-            int otp = (int)(Math.random() * 900000) + 100000;
-
-            admin.setTwoFactorSecret(String.valueOf(otp));
-            adminRepository.save(admin);
-
-            return ResponseEntity.ok("OTP:" + otp);
-        }
-
-        // STEP 2: Verify OTP
-        if(!admin.getTwoFactorSecret().equals(request.getCode())){
-            return ResponseEntity.badRequest().body("Invalid OTP");
-        }
-
-        // STEP 3: Enable 2FA
-        admin.setTwoFactorEnabled(true);
-        admin.setTwoFactorSecret(null);
-
-        adminRepository.save(admin);
-
-        return ResponseEntity.ok("Two Factor Authentication Enabled");
-    }
 }

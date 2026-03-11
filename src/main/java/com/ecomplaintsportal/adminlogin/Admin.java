@@ -23,8 +23,7 @@ public class Admin {
     private String bio;   // ✅ ADD THIS
 
     private boolean twoFactorEnabled;
-    private String twoFactorSecret;
-    
+
     public Admin() {}
 
     /* ================= GETTERS ================= */
@@ -80,12 +79,4 @@ public class Admin {
     public void setTwoFactorEnabled(boolean twoFactorEnabled) {
         this.twoFactorEnabled = twoFactorEnabled;
     }
-    public String getTwoFactorSecret() {
-        return twoFactorSecret;
-    }
-
-    public void setTwoFactorSecret(String twoFactorSecret) {
-        this.twoFactorSecret = twoFactorSecret;
-    }
-    
 }
