@@ -16,14 +16,12 @@ public class UserService {
     // ================= REGISTER USER =================
     public User registerUser(User user) {
 
-        // Check if email already exists
         User existingUser = userRepository.findByEmail(user.getEmail());
 
         if (existingUser != null) {
             throw new RuntimeException("Email already registered");
         }
 
-        // Encrypt password before saving
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         return userRepository.save(user);
@@ -32,10 +30,8 @@ public class UserService {
     // ================= LOGIN USER =================
     public User loginUser(String login, String password) {
 
-        // Login using email OR phone OR full name
         User user = userRepository.findByEmailOrPhoneOrFullName(login, login, login);
 
-        // Check password using PasswordEncoder
         if (user != null && passwordEncoder.matches(password, user.getPassword())) {
             return user;
         }
@@ -60,8 +56,27 @@ public class UserService {
             return "Security Answer Incorrect";
         }
 
-        // Update password with encryption
         user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        return "Password Updated Successfully";
+    }
+
+    // ================= CHANGE PASSWORD =================
+    public String changePassword(String userId, String currentPassword, String newPassword) {
+
+        User user = userRepository.findById(userId).orElse(null);
+
+        if (user == null) {
+            return "User Not Found";
+        }
+
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            return "Current Password Incorrect";
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+
         userRepository.save(user);
 
         return "Password Updated Successfully";
