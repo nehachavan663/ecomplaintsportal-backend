@@ -28,13 +28,16 @@ public class User {
     // Security
     private String securityQuestion;
     private String securityAnswer;
+ // Two Factor Authentication
+    private String twoFASecret;
+    private boolean twoFAEnabled;
     
     // Getters and Setters 
 	public String getId() {
 		return id;
 	}
 	public void setId(String id) {
-		this.id = id;
+		this.id = id; 
 	}
 	public String getFullName() {
 		return fullName;
@@ -101,5 +104,20 @@ public class User {
 	}
 	public void setSecurityAnswer(String securityAnswer) {
 		this.securityAnswer = securityAnswer;
+	}
+	public String getTwoFASecret() {
+	    return twoFASecret;
+	}
+
+	public void setTwoFASecret(String twoFASecret) {
+	    this.twoFASecret = twoFASecret;
+	}
+
+	public boolean isTwoFAEnabled() {
+	    return twoFAEnabled;
+	}
+
+	public void setTwoFAEnabled(boolean twoFAEnabled) {
+	    this.twoFAEnabled = twoFAEnabled;
 	}
 }
