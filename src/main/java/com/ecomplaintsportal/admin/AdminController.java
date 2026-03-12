@@ -17,6 +17,7 @@ public class AdminController {
 
     @Autowired
     private ComplaintRepository complaintRepository;
+
     @GetMapping("/dashboard")
     public Map<String, Object> getDashboardData() {
 
@@ -32,24 +33,25 @@ public class AdminController {
         response.put("inProgress", inProgress);
         response.put("resolved", resolved);
 
-        // Department statistics
         Map<String, Long> departmentStats = new HashMap<>();
 
         List<Complaint> complaints = complaintRepository.findAll();
 
         for (Complaint c : complaints) {
+
             String dept = c.getDepartment();
 
+            if (dept == null || dept.isBlank()) {
+                dept = "Unassigned";
+            }
+
             departmentStats.put(
-                dept,
-                departmentStats.getOrDefault(dept, 0L) + 1
+                    dept,
+                    departmentStats.getOrDefault(dept, 0L) + 1
             );
         }
 
         response.put("departmentStats", departmentStats);
-
-       
-        
 
         return response;
     }
