@@ -66,4 +66,26 @@ public class UserService {
 
         return "Password Updated Successfully";
     }
+ // ================= CHANGE PASSWORD =================
+
+    public String changePassword(String userId, String currentPassword, String newPassword) {
+
+        User user = userRepository.findById(userId).orElse(null);
+
+        if (user == null) {
+            return "User not found";
+        }
+
+        // Check current password
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            return "Current password incorrect";
+        }
+
+        // Encode new password
+        user.setPassword(passwordEncoder.encode(newPassword));
+
+        userRepository.save(user);
+
+        return "Password updated successfully";
+    }
 }
