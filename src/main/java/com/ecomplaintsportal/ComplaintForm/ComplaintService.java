@@ -44,25 +44,42 @@ public class ComplaintService {
         Complaint existing = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Complaint not found"));
 
-        /* ---------- STATUS UPDATE ---------- */
-
         if (updatedComplaint.getStatus() != null) {
 
             String newStatus = updatedComplaint.getStatus().trim();
             String oldStatus = existing.getStatus();
 
-            if (!newStatus.equals(oldStatus)) {
+            if (!newStatus.equalsIgnoreCase(oldStatus)) {
 
-                if ("In Progress".equalsIgnoreCase(newStatus) && existing.getStartedAt() == null) {
-                    existing.setStartedAt(LocalDateTime.now());
-                }
+                LocalDateTime now = LocalDateTime.now();
 
-                if ("Resolved".equalsIgnoreCase(newStatus) && existing.getResolvedAt() == null) {
-                    existing.setResolvedAt(LocalDateTime.now());
-                }
+                switch (newStatus) {
+
+                // Any status → Pending
+                case "Pending":
+                    existing.setStartedAt(null);
+                    existing.setResolvedAt(null);
+                    break;
+
+                // Pending / Resolved → In Progress
+                case "In Progress":
+                    existing.setStartedAt(now);
+                    existing.setResolvedAt(null);
+                    break;
+
+                // In Progress / Pending → Resolved
+                case "Resolved":
+
+                    if (existing.getStartedAt() == null) {
+                        existing.setStartedAt(now);
+                    }
+
+                    existing.setResolvedAt(now);
+                    break;
             }
 
-            existing.setStatus(newStatus);
+                existing.setStatus(newStatus);
+            }
         }
 
         /* ---------- RESPONSE UPDATE ---------- */
@@ -92,7 +109,7 @@ public class ComplaintService {
         if (existing.getStudentId() != null) {
             messagingTemplate.convertAndSend(
                     "/topic/complaints/" + existing.getStudentId(),
-                    "updated"
+                    saved
             );
         }
 
