@@ -16,7 +16,7 @@ import com.ecomplaintsportal.LRE.User;
 import com.mongodb.client.gridfs.model.GridFSFile;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
-@CrossOrigin(origins="*")
+
 @RestController
 @RequestMapping("/api/studentProfile")
 public class StudentProfileController {

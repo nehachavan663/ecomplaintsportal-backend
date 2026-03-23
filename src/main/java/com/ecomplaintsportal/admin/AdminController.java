@@ -12,7 +12,7 @@ import com.ecomplaintsportal.ComplaintForm.ComplaintRepository;
 
 @RestController
 @RequestMapping("/api/admin")
-@CrossOrigin(origins = "*")
+
 public class AdminController {
 
     @Autowired
