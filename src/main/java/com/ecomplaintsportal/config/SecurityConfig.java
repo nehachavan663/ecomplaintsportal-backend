@@ -33,9 +33,11 @@ public class SecurityConfig {
 
         CorsConfiguration config = new CorsConfiguration();
 
+  
         config.setAllowedOrigins(Arrays.asList(
-                "https://ecomplaintsportal.vercel.app"
-        ));
+        	    "https://ecomplaintsportal.vercel.app",
+        	    "https://ecomplaintsportal-frontend.vercel.app"
+        	));
 
         config.setAllowedMethods(Arrays.asList(
                 "GET", "POST", "PUT", "DELETE", "OPTIONS"
