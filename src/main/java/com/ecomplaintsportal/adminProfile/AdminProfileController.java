@@ -9,7 +9,7 @@ import com.ecomplaintsportal.adminlogin.AdminRepository;
 
 @RestController
 @RequestMapping("/api/admin")
-@CrossOrigin(origins = "*")
+
 public class AdminProfileController {
 
     @Autowired
