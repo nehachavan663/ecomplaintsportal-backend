@@ -18,7 +18,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .cors(cors -> {}) // ✅ ENABLE CORS
+            // ✅ IMPORTANT: Explicitly attach CORS configuration
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 .anyRequest().permitAll()
@@ -27,31 +28,37 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // ✅ CORS CONFIGURATION
+    // ✅ CORS CONFIGURATION (FIXED)
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
 
         CorsConfiguration config = new CorsConfiguration();
 
-  
-        config.setAllowedOrigins(Arrays.asList(
-        	    "https://ecomplaintsportal.vercel.app",
-        	    "https://ecomplaintsportal-frontend.vercel.app"
-        	));
+        // ✅ Use patterns instead of exact origins (handles localhost ports)
+        config.setAllowedOriginPatterns(Arrays.asList(
+                "http://localhost:*",
+                "https://ecomplaintsportal-frontend.vercel.app"
+        ));
 
+        // ✅ Allow all required HTTP methods
         config.setAllowedMethods(Arrays.asList(
                 "GET", "POST", "PUT", "DELETE", "OPTIONS"
         ));
 
+        // ✅ Allow all headers
         config.setAllowedHeaders(Arrays.asList("*"));
+
+        // ✅ Required for cookies/auth headers
         config.setAllowCredentials(true);
 
+        // ✅ Apply config to all endpoints
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
 
         return source;
     }
 
+    // ✅ Password encoder (no change needed)
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
