@@ -13,13 +13,14 @@ import com.ecomplaintsportal.LRE.UserRepository;
 
 @RestController
 @RequestMapping("/api/admin")
-@CrossOrigin(origins = "*")
 public class AdminController {
 
     @Autowired
     private ComplaintRepository complaintRepository;
+
     @Autowired
-    private UserRepository userRepository;   // ✅ ADD THIS
+    private UserRepository userRepository; // ✅ keep this
+
     @GetMapping("/dashboard")
     public Map<String, Object> getDashboardData() {
 
@@ -30,21 +31,31 @@ public class AdminController {
         long inProgress = complaintRepository.countByStatus("In Progress");
         long resolved = complaintRepository.countByStatus("Resolved");
 
-        long studentCount = userRepository.count(); // ✅ ADD THIS
+        long studentCount = userRepository.count(); // ✅ keep this
 
         response.put("total", total);
         response.put("pending", pending);
         response.put("inProgress", inProgress);
         response.put("resolved", resolved);
-        response.put("studentCount", studentCount); // ✅ ADD THIS
+        response.put("studentCount", studentCount);
 
         // Department stats
         Map<String, Long> departmentStats = new HashMap<>();
         List<Complaint> complaints = complaintRepository.findAll();
 
         for (Complaint c : complaints) {
+
             String dept = c.getDepartment();
-            departmentStats.put(dept, departmentStats.getOrDefault(dept, 0L) + 1);
+
+            // ✅ BEST VERSION (handles null)
+            if (dept == null || dept.isBlank()) {
+                dept = "Unassigned";
+            }
+
+            departmentStats.put(
+                dept,
+                departmentStats.getOrDefault(dept, 0L) + 1
+            );
         }
 
         response.put("departmentStats", departmentStats);

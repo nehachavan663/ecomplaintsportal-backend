@@ -1,5 +1,6 @@
 package com.ecomplaintsportal.LRE;
 
+
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
@@ -7,7 +8,7 @@ import org.springframework.stereotype.Repository;
 public interface UserRepository extends MongoRepository<User, String> {
 
     User findByEmail(String email);
-
+    
     User findByEmailOrPhoneOrFullName(String email,String phone,String fullName);
 
 }
