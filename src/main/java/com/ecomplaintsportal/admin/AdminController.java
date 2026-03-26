@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.ecomplaintsportal.ComplaintForm.Complaint;
 import com.ecomplaintsportal.ComplaintForm.ComplaintRepository;
+import com.ecomplaintsportal.LRE.UserRepository;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -17,6 +18,8 @@ public class AdminController {
 
     @Autowired
     private ComplaintRepository complaintRepository;
+    @Autowired
+    private UserRepository userRepository;   // ✅ ADD THIS
     @GetMapping("/dashboard")
     public Map<String, Object> getDashboardData() {
 
@@ -27,29 +30,24 @@ public class AdminController {
         long inProgress = complaintRepository.countByStatus("In Progress");
         long resolved = complaintRepository.countByStatus("Resolved");
 
+        long studentCount = userRepository.count(); // ✅ ADD THIS
+
         response.put("total", total);
         response.put("pending", pending);
         response.put("inProgress", inProgress);
         response.put("resolved", resolved);
+        response.put("studentCount", studentCount); // ✅ ADD THIS
 
-        // Department statistics
+        // Department stats
         Map<String, Long> departmentStats = new HashMap<>();
-
         List<Complaint> complaints = complaintRepository.findAll();
 
         for (Complaint c : complaints) {
             String dept = c.getDepartment();
-
-            departmentStats.put(
-                dept,
-                departmentStats.getOrDefault(dept, 0L) + 1
-            );
+            departmentStats.put(dept, departmentStats.getOrDefault(dept, 0L) + 1);
         }
 
         response.put("departmentStats", departmentStats);
-
-       
-        
 
         return response;
     }
