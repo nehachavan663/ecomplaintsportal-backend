@@ -1,10 +1,14 @@
 package com.ecomplaintsportal.LRE;
 
-import org.springframework.data.mongodb.repository.MongoRepository;
 
-public interface UserRepository extends MongoRepository<User, Long> {
+import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface UserRepository extends MongoRepository<User, String> {
 
     User findByEmail(String email);
+    
     User findByEmailOrPhoneOrFullName(String email,String phone,String fullName);
 
 }

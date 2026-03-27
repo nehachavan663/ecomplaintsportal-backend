@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
-@CrossOrigin(origins = "*")
+
 @RestController
 @RequestMapping("/api/lre")
 public class UserController {
@@ -45,5 +45,16 @@ public class UserController {
         String newPassword = data.get("newPassword");
 
         return userService.verifyAndUpdate(email, question, answer, newPassword);
+    }
+ // ================= CHANGE PASSWORD =================
+
+    @PutMapping("/change-password")
+    public String changePassword(@RequestBody Map<String, String> data) {
+
+        String userId = data.get("userId");
+        String currentPassword = data.get("currentPassword");
+        String newPassword = data.get("newPassword");
+
+        return userService.changePassword(userId, currentPassword, newPassword);
     }
 }
