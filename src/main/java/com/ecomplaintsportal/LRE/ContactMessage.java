@@ -14,7 +14,8 @@ public class ContactMessage {
     private String subject;
     private String message;
 
-    // Getters & Setters
+    private String adminResponse; // ✅ NEW FIELD
+
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
 
@@ -29,4 +30,7 @@ public class ContactMessage {
 
     public String getMessage() { return message; }
     public void setMessage(String message) { this.message = message; }
+
+    public String getAdminResponse() { return adminResponse; }
+    public void setAdminResponse(String adminResponse) { this.adminResponse = adminResponse; }
 }
