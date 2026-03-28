@@ -43,7 +43,6 @@ public class ContactController {
             throw new RuntimeException("Message not found");
         }
 
-        // ✅ FIX: define replyText
         String replyText = updatedMsg.getAdminResponse();
 
         if (replyText == null || replyText.trim().isEmpty()) {
@@ -54,7 +53,6 @@ public class ContactController {
 
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
-
             MimeMessageHelper helper =
                     new MimeMessageHelper(mimeMessage, true, "UTF-8");
 
@@ -63,35 +61,37 @@ public class ContactController {
 
             String htmlContent =
                     "<div style='font-family:Segoe UI;padding:20px'>" +
-
                     "<h2 style='color:#4CAF50;'>E-Complaints Portal</h2>" +
-
                     "<p>Hello <b>" + msg.getName() + "</b>,</p>" +
-
                     "<p><b>Your Message:</b></p>" +
                     "<div style='background:#f1f1f1;padding:12px;border-radius:8px'>" +
                     msg.getMessage() +
                     "</div>" +
-
                     "<p><b>Admin Reply:</b></p>" +
                     "<div style='background:#d4edda;padding:12px;border-radius:8px;color:#155724'>" +
                     replyText +
                     "</div>" +
-
                     "<br><p>Regards,<br><b>Ecomplaints Team</b></p>" +
                     "</div>";
 
             helper.setText(htmlContent, true);
-
             mailSender.send(mimeMessage);
-
-            System.out.println("✅ EMAIL SENT SUCCESS");
 
         } catch (Exception e) {
             e.printStackTrace();
-            return msg; 
         }
 
-        return repo.save(msg);
+        return repo.save(msg);   // ✅ IMPORTANT
+    }
+    @DeleteMapping("/{id}")
+    public String deleteMessage(@PathVariable String id) {
+
+        if (!repo.existsById(id)) {
+            throw new RuntimeException("Message not found");
+        }
+
+        repo.deleteById(id);
+
+        return "Message deleted successfully";
     }
 }
