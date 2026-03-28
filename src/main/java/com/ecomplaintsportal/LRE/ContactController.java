@@ -19,20 +19,20 @@ public class ContactController {
     @Autowired
     private JavaMailSender mailSender;
 
-    // ✅ SAVE MESSAGE
+    // SAVE MESSAGE
     @PostMapping
     public String saveMessage(@RequestBody ContactMessage message) {
         repo.save(message);
         return "Message Sent Successfully!";
     }
 
-    // ✅ GET ALL MESSAGES
+    // GET ALL MESSAGES
     @GetMapping
     public List<ContactMessage> getAllMessages() {
         return repo.findAll();
     }
 
-    // ✅ SEND RESPONSE + HTML EMAIL
+    // SEND RESPONSE + HTML EMAIL
     @PutMapping("/{id}")
     public ContactMessage sendReply(@PathVariable String id,
                                     @RequestBody ContactMessage updatedMsg) {
@@ -43,36 +43,45 @@ public class ContactController {
             throw new RuntimeException("Message not found");
         }
 
-        msg.setAdminResponse(updatedMsg.getAdminResponse());
+        // ✅ FIX: define replyText
+        String replyText = updatedMsg.getAdminResponse();
+
+        if (replyText == null || replyText.trim().isEmpty()) {
+            throw new RuntimeException("Reply cannot be empty");
+        }
+
+        msg.setAdminResponse(replyText);
 
         try {
-            // ✅ HTML EMAIL
             MimeMessage mimeMessage = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
+
+            MimeMessageHelper helper =
+                    new MimeMessageHelper(mimeMessage, true, "UTF-8");
 
             helper.setTo(msg.getEmail());
             helper.setSubject("Re: " + msg.getSubject());
 
             String htmlContent =
-                    "<div style='font-family:Arial;padding:20px'>" +
-                    "<h2 style='color:#2c3e50;'>E-Complaints Portal</h2>" +
+                    "<div style='font-family:Segoe UI;padding:20px'>" +
+
+                    "<h2 style='color:#4CAF50;'>E-Complaints Portal</h2>" +
 
                     "<p>Hello <b>" + msg.getName() + "</b>,</p>" +
 
                     "<p><b>Your Message:</b></p>" +
-                    "<div style='background:#f4f4f4;padding:10px;border-radius:5px'>" +
+                    "<div style='background:#f1f1f1;padding:12px;border-radius:8px'>" +
                     msg.getMessage() +
                     "</div>" +
 
                     "<p><b>Admin Reply:</b></p>" +
-                    "<div style='background:#e8f5e9;padding:10px;border-radius:5px'>" +
-                    updatedMsg.getAdminResponse() +
+                    "<div style='background:#d4edda;padding:12px;border-radius:8px;color:#155724'>" +
+                    replyText +
                     "</div>" +
 
-                    "<br><p>Thank you,<br><b>Ecomplaints Team</b></p>" +
+                    "<br><p>Regards,<br><b>Ecomplaints Team</b></p>" +
                     "</div>";
 
-            helper.setText(htmlContent, true); // ✅ HTML enabled
+            helper.setText(htmlContent, true);
 
             mailSender.send(mimeMessage);
 
@@ -80,7 +89,7 @@ public class ContactController {
 
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException("Email sending failed");
+            return msg; 
         }
 
         return repo.save(msg);
