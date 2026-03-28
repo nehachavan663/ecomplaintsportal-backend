@@ -52,7 +52,13 @@ public class ContactController {
                 "Thank you."
             );
 
-            mailSender.send(mail);
+            // 🔥 ADD HERE
+            try {
+                mailSender.send(mail);
+                System.out.println("EMAIL SENT SUCCESS");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
             return repo.save(msg);
         }
