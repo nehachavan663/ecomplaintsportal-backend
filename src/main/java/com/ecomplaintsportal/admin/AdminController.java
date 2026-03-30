@@ -7,7 +7,6 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import com.ecomplaintsportal.ComplaintForm.Complaint;
 import com.ecomplaintsportal.ComplaintForm.ComplaintRepository;
 import com.ecomplaintsportal.LRE.UserRepository;
 
@@ -19,19 +18,20 @@ public class AdminController {
     private ComplaintRepository complaintRepository;
 
     @Autowired
-    private UserRepository userRepository; // ✅ keep this
+    private UserRepository userRepository;
 
     @GetMapping("/dashboard")
     public Map<String, Object> getDashboardData() {
 
         Map<String, Object> response = new HashMap<>();
 
+        // ✅ Fast counts (indexed)
         long total = complaintRepository.count();
         long pending = complaintRepository.countByStatus("Pending");
         long inProgress = complaintRepository.countByStatus("In Progress");
         long resolved = complaintRepository.countByStatus("Resolved");
 
-        long studentCount = userRepository.count(); // ✅ keep this
+        long studentCount = userRepository.count();
 
         response.put("total", total);
         response.put("pending", pending);
@@ -39,23 +39,22 @@ public class AdminController {
         response.put("resolved", resolved);
         response.put("studentCount", studentCount);
 
-        // Department stats
+        // ✅ FIXED: Department stats using aggregation (NO findAll)
         Map<String, Long> departmentStats = new HashMap<>();
-        List<Complaint> complaints = complaintRepository.findAll();
 
-        for (Complaint c : complaints) {
+        List<Map<String, Object>> results = complaintRepository.countByDepartment();
 
-            String dept = c.getDepartment();
+        for (Map<String, Object> row : results) {
 
-            // ✅ BEST VERSION (handles null)
+            String dept = (String) row.get("_id");
+
             if (dept == null || dept.isBlank()) {
                 dept = "Unassigned";
             }
 
-            departmentStats.put(
-                dept,
-                departmentStats.getOrDefault(dept, 0L) + 1
-            );
+            Long count = ((Number) row.get("count")).longValue();
+
+            departmentStats.put(dept, count);
         }
 
         response.put("departmentStats", departmentStats);
